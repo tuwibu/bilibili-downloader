@@ -2,7 +2,7 @@
   <div :class="['container fr', !taskList || !taskList.size ? 'ac jc' : 'bg-fff']">
     <a-empty v-if="!taskList || !taskList.size" :image="require('../assets/images/no-data.png')">
       <template #description>
-        <span class="text-active" style="font-weight: bold">暂无数据</span>
+        <span class="text-active" style="font-weight: bold">Không có dữ liệu</span>
       </template>
     </a-empty>
     <template v-else>
@@ -20,7 +20,7 @@
           </div>
           <div class="content fc jsb">
             <div class="ellipsis-1">{{ value.title }}</div>
-            <div>状态：<span class="text-active">{{ formatDownloadStatus(value.status, 'label') }}</span></div>
+            <div>Tình trạng：<span class="text-active">{{ formatDownloadStatus(value.status, 'label') }}</span></div>
             <div>
               <a-progress :percent="value.progress" :status="formatDownloadStatus(value.status, 'value')" strokeColor="#fb7299"></a-progress>
             </div>
@@ -37,13 +37,13 @@
             <a class="ellipsis-1 up-name" @click="openBrowser(`https://space.bilibili.com/${item.mid}`)">{{ item.name }}</a>
           </div>
         </div>
-        <div class="mt8 pl16">创建时间：<span class="text-active">{{ dayjs(rightTask.createdTime).format('YYYY-MM-DD HH:mm:ss') }}</span></div>
-        <div class="mt8 pl16">视频大小：<span class="text-active">{{ formatVideoSize(rightTask.size) }}</span></div>
-        <div class="mt8 pl16">视频时长：<span class="text-active">{{ rightTask.duration }}</span></div>
-        <div class="mt8 pl16">清晰度：<span class="text-active">{{ formatQuality(rightTask.quality) }}</span></div>
-        <div class="mt8 pl16">播放：<span class="text-active">{{ rightTask.view }}</span></div>
-        <div class="mt8 pl16">弹幕：<span class="text-active">{{ rightTask.danmaku }}</span></div>
-        <div class="mt8 pl16">评论：<span class="text-active">{{ rightTask.reply }}</span></div>
+        <div class="mt8 pl16">Thời gian tạo：<span class="text-active">{{ dayjs(rightTask.createdTime).format('YYYY-MM-DD HH:mm:ss') }}</span></div>
+        <div class="mt8 pl16">Kích thước video：<span class="text-active">{{ formatVideoSize(rightTask.size) }}</span></div>
+        <div class="mt8 pl16">Thời lượng video：<span class="text-active">{{ rightTask.duration }}</span></div>
+        <div class="mt8 pl16">Chất lượng：<span class="text-active">{{ formatQuality(rightTask.quality) }}</span></div>
+        <div class="mt8 pl16">Lượt xem：<span class="text-active">{{ rightTask.view }}</span></div>
+        <div class="mt8 pl16">Tấm màn：<span class="text-active">{{ rightTask.danmaku }}</span></div>
+        <div class="mt8 pl16">Bình luận：<span class="text-active">{{ rightTask.reply }}</span></div>
       </div>
     </template>
   </div>

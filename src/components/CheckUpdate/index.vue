@@ -52,7 +52,7 @@ const checkUpdate = async () => {
       visible.value = true
     }
   } catch (error) {
-    message.error(`检查更新失败：${error}`)
+    message.error(`Check for updates failed：${error}`)
   }
 }
 

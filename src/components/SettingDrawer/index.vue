@@ -4,7 +4,7 @@
     :visible="visible"
     :closable="false"
     :maskClosable="true"
-    title="设置"
+    title="Cài đặt"
     :width="320"
     @close="hide"
   >
@@ -30,9 +30,9 @@
           <LoginOutlined v-if="loginStatus === 0" @click="loginModal.open()" />
           <a-popconfirm
             v-else
-            title="你确定要退出登录吗?"
-            ok-text="是"
-            cancel-text="否"
+            title="Bạn có chắc chắn bạn muốn thoát?"
+            ok-text="CÓ"
+            cancel-text="KHÔNG"
             @confirm="quitLogin"
           >
             <LogoutOutlined />

@@ -23,17 +23,17 @@ const template: any = [
   {
     label: app.name,
     submenu: [
-      { label: '关于', role: 'about' },
-      { label: '缩小', role: 'minimize' },
-      { label: '退出', role: 'quit' }
+      { label: 'Về', role: 'about' },
+      { label: 'thu nhỏ', role: 'minimize' },
+      { label: 'thoát', role: 'quit' }
     ]
   },
   {
-    label: '操作',
+    label: 'Vận hành',
     submenu: [
-      { label: '全选', role: 'selectAll' },
-      { label: '复制', role: 'copy' },
-      { label: '粘贴', role: 'paste' }
+      { label: 'chọn tất cả', role: 'selectAll' },
+      { label: 'sao chép', role: 'copy' },
+      { label: 'dán', role: 'paste' }
     ]
   }
 ]
@@ -58,7 +58,7 @@ ipcMain.on('open-path', (event, path) => {
 // 打开选择文件夹dialog
 ipcMain.handle('open-dir-dialog', () => {
   const filePaths = dialog.showOpenDialogSync({
-    title: '选择下载地址',
+    title: 'Chọn địa chỉ tải xuống',
     defaultPath: app.getPath('downloads'),
     properties: ['openDirectory']
   })
@@ -129,35 +129,35 @@ ipcMain.handle('show-context-menu', (event, type: string) => {
     const menuMap = {
       download: [
         {
-          label: '删除任务',
+          label: 'Xóa tác vụ',
           type: 'normal',
           click: () => resolve('delete')
         },
         {
-          label: '重新下载',
+          label: 'tải lại',
           type: 'normal',
           click: () => resolve('reload')
         },
         {
-          label: '打开文件夹',
+          label: 'mở thư mục',
           type: 'normal',
           click: () => resolve('open')
         },
         {
-          label: '全选',
+          label: 'chọn tất cả',
           type: 'normal',
           click: () => resolve('selectAll')
         },
         {
-          label: '播放视频',
+          label: 'phát video',
           type: 'normal',
           click: () => resolve('play')
         }
       ],
       home: [
-        { label: '全选', role: 'selectAll' },
-        { label: '复制', role: 'copy' },
-        { label: '粘贴', role: 'paste' }
+        { label: 'Chọn tất cả', role: 'selectAll' },
+        { label: 'copy', role: 'copy' },
+        { label: 'dán', role: 'paste' }
       ]
     }
     const template: any = menuMap[type]
@@ -171,10 +171,10 @@ ipcMain.handle('open-delete-video-dialog', (event, taskCount) => {
   return new Promise((resolve, reject) => {
     dialog.showMessageBox(win, {
       type: 'info',
-      title: '提示',
-      message: `当前选中${taskCount}个任务，你确定要删除吗？`,
-      checkboxLabel: '同时删除文件',
-      buttons: ['取消', '删除']
+      title: 'gợi ý',
+      message: `Hiện đã được chọn${taskCount}nhiệm vụ, bạn có chắc chắn muốn xóa nó không?？`,
+      checkboxLabel: 'Đồng thời xóa các tập tin',
+      buttons: ['Hủy bỏ', 'xóa bỏ']
     })
       .then(res => {
         return resolve(res)
@@ -234,9 +234,9 @@ ipcMain.handle('open-reload-video-dialog', (event, taskCount) => {
   return new Promise((resolve, reject) => {
     dialog.showMessageBox(win, {
       type: 'info',
-      title: '提示',
-      message: `当前选中${taskCount}个任务，你确定要重新下载吗？`,
-      buttons: ['取消', '下载']
+      title: 'gợi ý',
+      message: `Hiện đã được chọn${taskCount}task, bạn có chắc chắn muốn tải xuống lại không?`,
+      buttons: ['Hủy bỏ', 'Tải xuống']
     })
       .then(res => {
         return resolve(res)
@@ -263,12 +263,11 @@ async function createWindow () {
     minimizable: true,
     titleBarStyle: 'hidden',
     webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
         .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     }
   })
 
@@ -324,8 +323,8 @@ function handleCloseApp () {
   dialog.showMessageBox(win, {
     type: 'info',
     title: '提示',
-    message: count ? `当前有${count}个任务正在下载中，关闭软件会导致任务下载失败，是否继续关闭软件？` : '是否关闭应用程序？',
-    buttons: ['取消', '关闭']
+    message: count ? `Hiện nay có${count}Một tác vụ đang được tải xuống. Việc đóng phần mềm sẽ khiến tác vụ tải xuống không thành công. Bạn có muốn tiếp tục đóng phần mềm không? ` : 'Có nên đóng ứng dụng không',
+    buttons: ['Hủy bỏ', 'Khép kín']
   })
     .then(res => {
       console.log(res);

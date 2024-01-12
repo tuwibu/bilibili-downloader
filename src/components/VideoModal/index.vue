@@ -6,9 +6,9 @@
     :okButtonProps="{ disabled: !(quality !== -1 && selected.length !== 0) }"
     :closable="false"
     :maskClosable="false"
-    title="当前视频信息"
-    okText="下载"
-    cancelText="取消"
+    title="Thông tin video hiện tại"
+    okText="Tải xuống"
+    cancelText="Hủy bỏ"
     @cancel="cancel"
     @ok="handleDownload">
     <div class="video-modal custom-scroll-bar">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="mt16">
-        选择清晰度：
+        Chọn sự rõ ràng：
         <div class="mt8">
           <a-radio-group v-model:value="quality">
             <a-radio class="custom-radio" v-for="(item, index) in videoInfo.qualityOptions" :key="index" :value="item.value">
@@ -32,10 +32,10 @@
         </div>
       </div>
       <div v-if="videoInfo.page && videoInfo.page.length > 1" class="fr ac jsb mt16">
-        <div>这是一个多P视频，请选择</div>
+        <div>Đây là video multi-P, vui lòng chọn</div>
         <div>
           <a-checkbox @change="onAllSelectedChange">
-            全选
+            chọn tất cả
           </a-checkbox>
         </div>
       </div>

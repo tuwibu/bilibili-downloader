@@ -8,8 +8,8 @@
       <div class="version mt16">
         {{ `${projectName} - v${version}` }} <ReloadOutlined @click="checkUpdate.checkUpdate()" />
       </div>
-      <div class="git mt16">项目地址：<span class="text-active" @click="openBrowser(projectUrl)">{{ projectUrl }}</span></div>
-      <div class="desc mt16">个人作品，代码稀烂，大佬轻喷，如有问题，<span class="text-active" @click="openBrowser(`${projectUrl}/issues`)">请点这里</span></div>
+      <div class="git mt16">địa chỉ dự án：<span class="text-active" @click="openBrowser(projectUrl)">{{ projectUrl }}</span></div>
+      <div class="desc mt16">Công việc cá nhân, code tệ quá, nếu có vấn đề gì xin cho biết.，<span class="text-active" @click="openBrowser(`${projectUrl}/issues`)">Xin vui lòng bấm vào đây</span></div>
     </div>
   </a-modal>
   <CheckUpdate ref="checkUpdate" />

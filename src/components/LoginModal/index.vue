@@ -4,14 +4,14 @@
     :visible="visible"
     :closable="false"
     :maskClosable="false"
-    title="请登录Bilibili"
+    title="Vui lòng đăng nhập vào Bilibili"
     :okText="handleOkText()"
     :okButtonProps="{ disabled: (activeTab === 1 && scanStatus !== 2 ) || (activeTab === 2 && !IPTSESSDATA) }"
-    cancelText="不登录"
+    cancelText="Không đăng nhập"
     @cancel="notLogin"
     @ok="login">
     <a-tabs v-model:activeKey="activeTab" centered>
-      <a-tab-pane :key="1" tab="扫码登录" force-render>
+      <a-tab-pane :key="1" tab="Quét mã để đăng nhập" force-render>
         <div class="login-box">
           <div class="qr-modal" v-if="!countDown">
             <SyncOutlined class="refresh" @click="createQrcode" />
@@ -25,7 +25,7 @@
             <template #suffix>
               <a-tooltip>
                 <template #title>
-                  <a @click="openBrowser('https://github.com/blogwy/BilibiliVideoDownload/wiki/%E8%8E%B7%E5%8F%96SESSDATA')">点击此处</a>查看如何获取SESSDATA
+                  <a @click="openBrowser('https://github.com/blogwy/BilibiliVideoDownload/wiki/%E8%8E%B7%E5%8F%96SESSDATA')">bấm vào đây</a>Xem cách nhận SESSDATA
                 </template>
                 <InfoCircleOutlined style="color: rgba(0, 0, 0, 0.45)" />
               </a-tooltip>
@@ -34,7 +34,7 @@
         </div>
       </a-tab-pane>
     </a-tabs>
-    <div class="mt16 desc">注：软件登录后只会获取你的SESSDATA来用做下载，账号是普通账号下载1080P视频，大会员可以下载8K视频，不登录下载480P视频</div>
+    <div class="mt16 desc">Lưu ý: Sau khi đăng nhập, phần mềm sẽ chỉ lấy SESSDATA của bạn để tải xuống. Tài khoản là tài khoản bình thường để tải xuống video 1080P. Thành viên cao cấp có thể tải xuống video 8K. Không cần đăng nhập để tải xuống video 480P.</div>
   </a-modal>
 </template>
 

@@ -8,6 +8,7 @@ import fs from 'fs-extra'
 import { settingData } from './assets/data/default'
 import { TaskData, SettingData } from './type'
 import downloadVideo from './core/download'
+import puppeteer from 'puppeteer'
 const Store = require('electron-store')
 const got = require('got')
 const log = require('electron-log')
@@ -55,6 +56,70 @@ ipcMain.on('open-path', (event, path) => {
   shell.openPath(path)
 })
 
+ipcMain.handle('getvideos', async (event, channelUrl) => {
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null
+  })
+  const page = await browser.newPage()
+  await page.goto(channelUrl, {
+    waitUntil: 'networkidle0',
+    timeout: 0
+  })
+  await page.waitForSelector('.cube-list', {
+    timeout: 0
+  })
+  const avatarChannel = await page.waitForSelector('.h-info > div.avatar-container img', {
+    timeout: 0
+  })
+  const avatarUrl = await avatarChannel?.evaluate(node => node.getAttribute('src'))
+  const channelName = await page.waitForSelector('.h-info > div.h-basic #h-name', {
+    timeout: 0
+  })
+  const name = await channelName?.evaluate(node => node.textContent)
+  const countVideo = await page.waitForSelector('#submit-video-type-filter a.active span', {
+    timeout: 0
+  })
+  const count = await countVideo?.evaluate(node => node.textContent)
+  const videos: {
+    videoUrl: string
+  }[] = []
+  let numPage = 1
+  let active = true
+  while (active) {
+    event.sender.send('get-video-status', `Đang get trang ${numPage}`)
+    const lists = await page.$$('.cube-list > li > a.cover')
+    if (lists.length > 0) {
+      await page.goto(`${channelUrl}?pn=${numPage}`, {
+        waitUntil: 'networkidle0',
+        timeout: 0
+      })
+      await page.waitForSelector('.cube-list', {
+        timeout: 0
+      })
+      const lists = await page.$$('.cube-list > li > a.cover')
+      for (const item of lists) {
+        const url = await item.evaluate(node => node.getAttribute('href'))
+        if (url) videos.push({ videoUrl: 'https:' + url })
+      }
+      numPage += 1
+    } else {
+      active = false
+      break
+    }
+  }
+  await browser.close()
+  return {
+    info: {
+      avatar: 'https:' + avatarUrl,
+      name,
+      count,
+      url: channelUrl
+    },
+    videos
+  }
+})
+
 // 打开选择文件夹dialog
 ipcMain.handle('open-dir-dialog', () => {
   const filePaths = dialog.showOpenDialogSync({
@@ -65,7 +130,7 @@ ipcMain.handle('open-dir-dialog', () => {
   if (filePaths) {
     return Promise.resolve(filePaths[0])
   } else {
-    return Promise.reject('not select')
+    return Promise.resolve('')
   }
 })
 
@@ -327,7 +392,7 @@ function handleCloseApp () {
     buttons: ['Hủy bỏ', 'Khép kín']
   })
     .then(res => {
-      console.log(res);
+      console.log(res)
       if (count) store.set('taskList', taskList)
       if (res.response === 1) win.destroy()
     })

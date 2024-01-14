@@ -59,11 +59,11 @@ const isCheck = ref<boolean>(true)
 let timer: any = null
 
 const handleOkText = () => {
-  const okText = ['未扫码', '已扫码', '确认登录']
+  const okText = ['Chưa quét mã', 'Mã được quét', 'Xác nhận đăng nhập']
   if (activeTab.value === 1) {
     return okText[scanStatus.value]
   } else {
-    return '确认登录'
+    return 'Xác nhận đăng nhập'
   }
 }
 

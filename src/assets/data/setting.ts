@@ -13,6 +13,13 @@ const formConfig = [
     tips: 'Mặc định sẽ là folder download'
   },
   {
+    label: 'Cookie',
+    placeholder: 'Nhập cookie',
+    type: 'input',
+    name: 'cookie',
+    tips: 'Cookie sẽ được lưu lại để sử dụng cho lần sau.'
+  },
+  {
     label: 'Số lượng tải xuống tối đa',
     type: 'slider',
     name: 'downloadingMaxSize',

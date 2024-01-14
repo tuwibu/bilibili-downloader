@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('electron', {
   openPath (path) {
     ipcRenderer.send('open-path', path)
   },
+  getvideos (path) {
+    return ipcRenderer.invoke('getvideos', path)
+  },
   openDirDialog () {
     return ipcRenderer.invoke('open-dir-dialog')
   },

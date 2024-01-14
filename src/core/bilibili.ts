@@ -5,6 +5,9 @@ import { customAlphabet } from 'nanoid'
 import alphabet from '../assets/data/alphabet'
 import { VideoData, Page, DownloadUrl, Subtitle, TaskData, Audio } from '../type'
 import { store, pinia } from '../store'
+import axios from 'axios'
+import puppeteer from 'puppeteer'
+import { message } from 'ant-design-vue'
 
 // 自定义uuid
 const nanoid = customAlphabet(alphabet, 16)
@@ -17,13 +20,10 @@ const getDownloadList = async (videoInfo: VideoData, selected: number[], quality
   const downloadList: VideoData[] = []
   for (let index = 0; index < selected.length; index++) {
     const currentPage = selected[index]
-    // 请求选中清晰度视频下载地址
     const currentPageData = videoInfo.page.find(item => item.page === currentPage)
     if (!currentPageData) throw new Error('获取视频下载地址错误')
     const currentCid = currentPageData.cid
     const currentBvid = currentPageData.bvid
-    // 获取下载地址
-    // 判断当前数据是否有下载地址列表，有则直接用，没有再去请求
     const downloadUrl: DownloadUrl = { video: '', audio: '' }
     const videoUrl = videoInfo.video.find(item => item.id === quality && item.cid === currentCid)
     const audioUrl = getHighQualityAudio(videoInfo.audio)
@@ -35,7 +35,6 @@ const getDownloadList = async (videoInfo: VideoData, selected: number[], quality
       downloadUrl.video = video
       downloadUrl.audio = audio
     }
-    // 获取字幕地址
     const subtitle = await getSubtitle(currentCid, currentBvid)
     const taskId = nanoid()
     const videoData: VideoData = {
@@ -61,7 +60,61 @@ const getDownloadList = async (videoInfo: VideoData, selected: number[], quality
   return downloadList
 }
 
+const getDownloadChannel = async (
+  videoInfo: VideoData[],
+  selecteds: {
+    url: string,
+    num: number
+  }[],
+  quality: number
+) => {
+  const downloadList: VideoData[] = []
+  for (let index = 0; index < videoInfo.length; index++) {
+    const video = videoInfo[index]
+    const selected = selecteds[index]
+    const currentPageData = video.page.find(item => item.page === selected.num)
+    console.log('currentPageData', currentPageData)
+    if (!currentPageData) throw new Error('lỗi khi lấy đường dẫn tải xuống video')
+    const currentCid = currentPageData.cid
+    const currentBvid = currentPageData.bvid
+    const downloadUrl: DownloadUrl = { video: '', audio: '' }
+    const videoUrl = video.video.find(item => item.id === quality && item.cid === currentCid)
+    const audioUrl = getHighQualityAudio(video.audio)
+    if (videoUrl && audioUrl) {
+      downloadUrl.video = videoUrl.url
+      downloadUrl.audio = audioUrl.url
+    } else {
+      const { video, audio } = await getDownloadUrl(currentCid, currentBvid, quality)
+      downloadUrl.video = video
+      downloadUrl.audio = audio
+    }
+    const subtitle = await getSubtitle(currentCid, currentBvid)
+    const taskId = nanoid()
+    const videoData: VideoData = {
+      ...video,
+      id: taskId,
+      title: currentPageData.title,
+      url: currentPageData.url,
+      quality: quality,
+      duration: currentPageData.duration,
+      createdTime: +new Date(),
+      cid: currentCid,
+      bvid: currentBvid,
+      downloadUrl,
+      filePathList: handleFilePathList(selected.num === 1 ? 0 : selected.num, currentPageData.title, video.up[0].name, currentBvid, taskId),
+      fileDir: handleFileDir(selected.num === 1 ? 0 : selected.num, currentPageData.title, video.up[0].name, currentBvid, taskId),
+      subtitle
+    }
+    downloadList.push(videoData)
+    if (index !== videoInfo.length - 1) {
+      await sleep(1000)
+    }
+  }
+  return downloadList
+}
+
 const addDownload = (videoList: VideoData[] | TaskData[]) => {
+  console.log('addDownload')
   const allowDownloadCount = store.settingStore(pinia).downloadingMaxSize - store.baseStore(pinia).downloadingTaskCount
   const taskList: TaskData[] = []
   if (allowDownloadCount >= 0) {
@@ -118,54 +171,133 @@ const checkLogin = async (SESSDATA: string) => {
 }
 
 // 检查url合法
-const checkUrl = (url: string) => {
-  const mapUrl = {
-    'video/av': 'BV',
-    'video/BV': 'BV',
-    'play/ss': 'ss',
-    'play/ep': 'ep'
-  }
-  let flag = false
-  for (const key in mapUrl) {
-    if (url.includes(key)) {
-      flag = true
-      return mapUrl[key]
+const checkUrl = (url: string, type: string, data?: {
+  videoUrl: string,
+}[]) => {
+  if (type === 'video') {
+    const mapUrl = {
+      'video/av': 'BV',
+      'video/BV': 'BV',
+      'play/ss': 'ss',
+      'play/ep': 'ep'
     }
-  }
-  if (!flag) {
-    return ''
+    let flag = false
+    for (const key in mapUrl) {
+      if (url.includes(key)) {
+        flag = true
+        return mapUrl[key]
+      }
+    }
+    if (!flag) {
+      return ''
+    }
+  } else if (type === 'channel' && data) {
+    const mapUrl = {
+      'video/av': 'BV',
+      'video/BV': 'BV',
+      'play/ss': 'ss',
+      'play/ep': 'ep'
+    }
+    // eslint-disable-next-line prefer-const
+    let newData: { url: string; type: any }[] = []
+    for (let index = 0; index < data.length; index++) {
+      const element = data[index]
+      message.open({
+        type: 'success',
+        content: `Đang kiểm tra url ${element.videoUrl}`,
+        duration: 1
+      })
+      for (const key in mapUrl) {
+        if (element.videoUrl.includes(key)) {
+          newData.push({
+            url: element.videoUrl,
+            type: mapUrl[key]
+          })
+        }
+      }
+    }
+    return newData
   }
 }
 
 // 检查url是否有重定向
-const checkUrlRedirect = async (videoUrl: string) => {
-  const params = {
-    videoUrl,
-    config: {
-      headers: {
-        'User-Agent': `${UA}`,
-        cookie: `SESSDATA=${store.settingStore(pinia).SESSDATA}`
+const checkUrlRedirect = async (videoUrl: string, type: string, data: {
+  url: string,
+  type: string
+}[]) => {
+  if (type === 'video') {
+    const params = {
+      videoUrl,
+      config: {
+        headers: {
+          'User-Agent': `${UA}`,
+          cookie: `SESSDATA=${store.settingStore(pinia).SESSDATA}`
+        }
       }
     }
-  }
-  const { body, redirectUrls } = await window.electron.got(params.videoUrl, params.config)
-  const url = redirectUrls[0] ? redirectUrls[0] : videoUrl
-  return {
-    body,
-    url
+    const { body, redirectUrls } = await window.electron.got(params.videoUrl, params.config)
+    const url = redirectUrls[0] ? redirectUrls[0] : videoUrl
+    return {
+      body,
+      url
+    }
+  } else if (type === 'channel' && data) {
+    const newData: { body: any; url: string; type: string }[] = []
+    for (let index = 0; index < data.length; index++) {
+      const element = data[index]
+      console.log('đang chạy url', element.url)
+      const params = {
+        videoUrl: element.url,
+        config: {
+          headers: {
+            'User-Agent': `${UA}`,
+            cookie: `SESSDATA=${store.settingStore(pinia).SESSDATA}`
+          }
+        }
+      }
+      const { body, redirectUrls } = await window.electron.got(params.videoUrl, params.config)
+      const url = redirectUrls[0] ? redirectUrls[0] : element.url
+      newData.push({
+        body,
+        url,
+        type: element.type
+      })
+    }
+    return newData
   }
 }
 
-const parseHtml = (html: string, type: string, url: string) => {
-  switch (type) {
-    case 'BV':
-      return parseBV(html, url)
-    case 'ss':
-      return parseSS(html)
-    case 'ep':
-      return parseEP(html, url)
-    default:
-      return -1
+const parseHtml = async (html: string, videoType: string, url: string, type: string, data?: any) => {
+  if (type === 'video') {
+    switch (videoType) {
+      case 'BV':
+        return parseBV(html, url)
+      case 'ss':
+        return parseSS(html)
+      case 'ep':
+        return parseEP(html, url)
+      default:
+        return -1
+    }
+  } else if (type === 'channel' && data) {
+    const infos: VideoData[] = []
+    for (let index = 0; index < data.length; index++) {
+      const element = data[index]
+      switch (element.type) {
+        case 'BV':
+          infos.push(await parseBV(element.body, element.url))
+          break
+        case 'ss':
+          infos.push(await parseSS(element.body))
+          break
+        case 'ep':
+          infos.push(await parseEP(element.body, element.url))
+          break
+        default:
+          break
+      }
+    }
+    return infos
   }
 }
 
@@ -427,5 +559,6 @@ export {
   checkUrlRedirect,
   parseHtml,
   getDownloadList,
-  addDownload
+  addDownload,
+  getDownloadChannel
 }

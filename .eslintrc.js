@@ -22,6 +22,10 @@ module.exports = {
     'no-prototype-builtins': 'off',
     'eol-last': 'off',
     'no-useless-escape': 'off',
-    'no-useless-constructor': 'off'
+    'no-useless-constructor': 'off',
+    'quote-props': 'off',
+    'space-infix-ops': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-explicit-any': 'off'
   }
 }

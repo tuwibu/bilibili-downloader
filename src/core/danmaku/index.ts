@@ -65,25 +65,25 @@ export class JsonDanmaku {
     try {
       viewBuffer = await window.electron.gotBuffer(`https://api.bilibili.com/x/v2/dm/web/view?type=1&oid=${this.cid}`, gotConfig)
     } catch (error) {
-      throw new Error('获取弹幕信息失败')
+      throw new Error('Không thể lấy được thông tin về đập')
     }
     if (!viewBuffer) {
-      throw new Error('获取弹幕信息失败')
+      throw new Error('Không thể lấy được thông tin về đập')
     }
     const view = await decodeDanmakuView(viewBuffer)
     const { total } = view.dmSge
     if (total === undefined) {
-      throw new Error(`获取弹幕分页数失败: ${JSON.stringify(lodash.omit(view, 'flag'))}`)
+      throw new Error(`Không thể lấy được thông tin về đập: ${JSON.stringify(lodash.omit(view, 'flag'))}`)
     }
     const segments = await Promise.all(new Array(total).fill(0).map(async (_, index) => {
       let buffer: any
       try {
         buffer = await window.electron.gotBuffer(`https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid=${this.cid}&segment_index=${index + 1}`, gotConfig)
       } catch (error) {
-        throw new Error('获取弹幕信息失败')
+        throw new Error('Không thể lấy được thông tin về đập')
       }
       if (!buffer) {
-        console.error(new Error(`弹幕片段${index + 1}下载失败`))
+        console.error(new Error(`Clip đập${index + 1}tải xuống không thành công`))
         return []
       }
       const result = await decodeDanmakuSegment(buffer)
@@ -140,6 +140,6 @@ export const downloadDanmaku = async (cid: number, title: string, path: string) 
     const str = await convertToAssFromJson(danmaku, title)
     window.electron.saveDanmukuFile(str, path)
   } catch (error: any) {
-    message.error(`弹幕下载错误：${error.message}`)
+    message.error(`Lỗi tải Danmaku：${error.message}`)
   }
 }

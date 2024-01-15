@@ -44,6 +44,7 @@ import { userQuality } from '../../assets/data/quality'
 import { VideoData } from '../../type'
 import { videoData } from '../../assets/data/default'
 import { sleep } from '../../utils'
+import { message } from 'ant-design-vue'
 
 const visible = ref<boolean>(false)
 const confirmLoading = ref<boolean>(false)
@@ -76,11 +77,15 @@ const handleDownload = async () => {
   const lists = await getDownloadChannel(toRaw(videoInfo.value), toRaw(selecteds.value), quality.value)
   const taskList = addDownload(lists)
   store.taskStore().setTask(taskList)
-  console.log(taskList)
   let count = 0
   let selectedTask = ''
   for (const key in taskList) {
     const task = taskList[key]
+    message.open({
+      key: task.id,
+      content: `Đang tải xuống: ${task.title}`,
+      icon: null
+    })
     if (task.status === 1) {
       window.electron.downloadVideo(task)
       count += 1

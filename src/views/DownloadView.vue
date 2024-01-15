@@ -13,7 +13,6 @@
           @click.left.exact="switchItem(key)"
           @click.ctrl.exact="multiSelect(key)"
           @click.meta.exact="multiSelect(key)"
-          @click.shift.exact="rangeSelect(key)"
           @click.right="showContextmenu()">
           <div class="img fr ac">
             <img :src="value.cover" :alt="value.title">
@@ -122,7 +121,7 @@ const showContextmenu = async () => {
   } else if (res === 'selectAll') {
     selectAll()
   } else if (res === 'reload') {
-    reloadDownload()
+    // reloadDownload()
   } else if (res === 'play') {
     playVideo()
   }
@@ -134,43 +133,43 @@ const playVideo = () => {
   }
 }
 
-const reloadDownload = async () => {
-  console.log('重新下载')
-  const { response } = await window.electron.openReloadVideoDialog(selected.value.length)
-  // 点击取消
-  if (!response) return
-  // 获取选中任务数据
-  const loading = message.loading('下载中...', 0)
-  let selectedTask: any[] = []
-  selected.value.forEach(item => {
-    const task = store.taskStore().getTask(item)
-    if (task) selectedTask.push(JSON.parse(JSON.stringify(task)))
-  })
-  selectedTask = selectedTask.map(item => ({
-    url: item.url,
-    quality: item.quality,
-    curPage: item.page.find((it: any) => it.cid === item.cid) ? item.page.find((it: any) => it.cid === item.cid).page : 0
-  }))
-  for (const key in selectedTask) {
-    const item = selectedTask[key]
-    if (!item.curPage) continue
-    const videoType = checkUrl(item.url)
-    const { body, url } = await checkUrlRedirect(item.url)
-    const videoInfo = await parseHtml(body, videoType, url)
-    if (videoInfo === -1) continue
-    // 当前list只会存在一项
-    const list = await getDownloadList(videoInfo, [item.curPage], item.quality)
-    const taskList = addDownload(list)
-    store.taskStore().setTask(taskList)
-    // 可以下载
-    if (taskList[0].status === 1) {
-      window.electron.downloadVideo(taskList[0])
-      store.baseStore().addDownloadingTaskCount(1)
-    }
-    await sleep(300)
-  }
-  loading()
-}
+// const reloadDownload = async () => {
+//   console.log('重新下载')
+//   const { response } = await window.electron.openReloadVideoDialog(selected.value.length)
+//   // 点击取消
+//   if (!response) return
+//   // 获取选中任务数据
+//   const loading = message.loading('下载中...', 0)
+//   let selectedTask: any[] = []
+//   selected.value.forEach(item => {
+//     const task = store.taskStore().getTask(item)
+//     if (task) selectedTask.push(JSON.parse(JSON.stringify(task)))
+//   })
+//   selectedTask = selectedTask.map(item => ({
+//     url: item.url,
+//     quality: item.quality,
+//     curPage: item.page.find((it: any) => it.cid === item.cid) ? item.page.find((it: any) => it.cid === item.cid).page : 0
+//   }))
+//   for (const key in selectedTask) {
+//     const item = selectedTask[key]
+//     if (!item.curPage) continue
+//     const videoType = checkUrl(item.url)
+//     const { body, url } = await checkUrlRedirect(item.url)
+//     const videoInfo = await parseHtml(body, videoType, url)
+//     if (videoInfo === -1) continue
+//     // 当前list只会存在一项
+//     const list = await getDownloadList(videoInfo, [item.curPage], item.quality)
+//     const taskList = addDownload(list)
+//     store.taskStore().setTask(taskList)
+//     // 可以下载
+//     if (taskList[0].status === 1) {
+//       window.electron.downloadVideo(taskList[0])
+//       store.baseStore().addDownloadingTaskCount(1)
+//     }
+//     await sleep(300)
+//   }
+//   loading()
+// }
 
 const openDir = () => {
   window.electron.openDir(toRaw(selected.value))

@@ -37,7 +37,7 @@ import LoginModal from '../components/LoginModal/index.vue'
 import VideoModal from '../components/VideoModal/index.vue'
 import ChannelModal from '../components/ChannelModal/index.vue'
 
-const videoUrl = ref<string | null>('https://space.bilibili.com/35926051/video')
+const videoUrl = ref<string | null>('https://space.bilibili.com/41263157/video?tid=0&special_type=&pn=1')
 const type = ref<string | null>(null)
 const loading = ref<boolean>(false)
 const userModal = ref<any>(null)
@@ -60,7 +60,7 @@ const download = async () => {
   }
   let data = null
   let infoChannel = null
-  if (videoUrl.value.includes('space.bilibili.com')) {
+  if (videoUrl.value.includes('space.bilibili.com') && videoUrl.value.includes('video')) {
     // eslint-disable-next-line no-const-assign
     const { info, videos } = await window.electron.getvideos(videoUrl.value)
     type.value = 'channel'
@@ -69,6 +69,7 @@ const download = async () => {
   } else {
     type.value = 'video'
   }
+  console.log('data', data)
   //  check if the video address is correct
   const videoType = checkUrl(videoUrl.value, type.value, data)
   // check videoType isString

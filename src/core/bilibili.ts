@@ -21,7 +21,7 @@ const getDownloadList = async (videoInfo: VideoData, selected: number[], quality
   for (let index = 0; index < selected.length; index++) {
     const currentPage = selected[index]
     const currentPageData = videoInfo.page.find(item => item.page === currentPage)
-    if (!currentPageData) throw new Error('获取视频下载地址错误')
+    if (!currentPageData) throw new Error('Gặp lỗi địa chỉ tải xuống video')
     const currentCid = currentPageData.cid
     const currentBvid = currentPageData.bvid
     const downloadUrl: DownloadUrl = { video: '', audio: '' }
@@ -73,7 +73,6 @@ const getDownloadChannel = async (
     const video = videoInfo[index]
     const selected = selecteds[index]
     const currentPageData = video.page.find(item => item.page === selected.num)
-    console.log('currentPageData', currentPageData)
     if (!currentPageData) throw new Error('lỗi khi lấy đường dẫn tải xuống video')
     const currentCid = currentPageData.cid
     const currentBvid = currentPageData.bvid
@@ -202,11 +201,6 @@ const checkUrl = (url: string, type: string, data?: {
     let newData: { url: string; type: any }[] = []
     for (let index = 0; index < data.length; index++) {
       const element = data[index]
-      message.open({
-        type: 'success',
-        content: `Đang kiểm tra url ${element.videoUrl}`,
-        duration: 1
-      })
       for (const key in mapUrl) {
         if (element.videoUrl.includes(key)) {
           newData.push({
@@ -245,7 +239,7 @@ const checkUrlRedirect = async (videoUrl: string, type: string, data: {
     const newData: { body: any; url: string; type: string }[] = []
     for (let index = 0; index < data.length; index++) {
       const element = data[index]
-      console.log('đang chạy url', element.url)
+      message.info(`Đang lấy dữ liệu${index + 1}/${data.length}`)
       const params = {
         videoUrl: element.url,
         config: {
@@ -491,14 +485,16 @@ const getSubtitle = async (cid: number, bvid: string) => {
 // 处理filePathList
 const handleFilePathList = (page: number, title: string, up: string, bvid: string, id: string): string[] => {
   const downloadPath = store.settingStore().downloadPath
-  const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
+  // const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
   const isFolder = store.settingStore().isFolder
   return [
-    `${downloadPath}/${isFolder ? `${name}/` : ''}${name}.mp4`,
-    `${downloadPath}/${isFolder ? `${name}/` : ''}${name}.png`,
-    `${downloadPath}/${isFolder ? `${name}/` : ''}${name}-video.m4s`,
-    `${downloadPath}/${isFolder ? `${name}/` : ''}${name}-audio.m4s`,
-    isFolder ? `${downloadPath}/${name}/` : ''
+    `${downloadPath}/${isFolder ? `${id}/` : ''}video.mp4`,
+    `${downloadPath}/${isFolder ? `${id}/` : ''}image.png`,
+    `${downloadPath}/${isFolder ? `${id}/` : ''}m4s-video.m4s`,
+    `${downloadPath}/${isFolder ? `${id}/` : ''}audio.m4s`,
+    // txt
+    `${downloadPath}/${isFolder ? `${id}/` : ''}name.txt`,
+    isFolder ? `${downloadPath}/${id}/` : ''
   ]
 }
 
@@ -507,7 +503,7 @@ const handleFileDir = (page: number, title: string, up: string, bvid: string, id
   const downloadPath = store.settingStore().downloadPath
   const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
   const isFolder = store.settingStore().isFolder
-  return `${downloadPath}${isFolder ? `/${name}/` : ''}`
+  return `${downloadPath}${isFolder ? `/${id}/` : ''}`
 }
 
 // 处理bv多p逻辑

@@ -22,6 +22,8 @@ function handleDeleteFile (setting: SettingData, videoInfo: TaskData) {
 }
 
 export default async (videoInfo: TaskData, event: IpcMainEvent, setting: SettingData) => {
+  console.log('videoInfo', videoInfo)
+  console.log('=========================')
   // throttle start
   let videoLastTime = 0
   let videoTimer: any = null
@@ -43,14 +45,19 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
   // 去掉扩展名的文件路径
   const fileName = videoInfo.filePathList[0].substring(0, videoInfo.filePathList[0].length - 4)
   if (setting.isFolder) {
-    // 创建文件夹
+    // Tạo thư mục
     try {
       fs.mkdirSync(`${videoInfo.fileDir}`)
-      log.info(`文件夹创建成功：${videoInfo.fileDir}`)
+      log.info(`Thư mục được tạo thành công: ${videoInfo.fileDir}`)
     } catch (error) {
-      log.error(`创建文件夹失败：${error}`)
+      log.error(`Không tạo được thư mục:${error}`)
     }
   }
+  fs.writeFile(videoInfo.filePathList[4], videoInfo.title, { encoding: 'utf8' }, (err: any) => {
+    if (!err) {
+      console.log('Tạo tệp name thành công')
+    }
+  })
   // 下载封面
   if (setting.isCover) {
     await pipeline(
@@ -65,6 +72,7 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
   if (setting.isSubtitle) {
     downloadSubtitle(fileName, videoInfo.subtitle)
   }
+
   // 下载弹幕
   if (setting.isDanmaku) {
     event.reply('download-danmuku', videoInfo.cid, videoInfo.title, `${fileName}.ass`)
@@ -93,7 +101,7 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
         }
       })
       .on('error', (error: any) => {
-        log.error(`视频下载失败：${videoInfo.title} ${error.message}`)
+        log.error(`Tải xuống video không thành công:${videoInfo.title} ${error.message}`)
         event.reply('download-video-status', {
           id: videoInfo.id,
           status: 5,
@@ -127,7 +135,7 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
         }
       })
       .on('error', (error: any) => {
-        log.error(`音频下载失败：${videoInfo.title} ${error.message}`)
+        log.error(`Tải xuống âm thanh không thành công:${videoInfo.title} ${error.message}`)
         event.reply('download-video-status', {
           id: videoInfo.id,
           status: 5,
@@ -150,7 +158,7 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
       videoInfo.filePathList[0]
     )
       .then((res: any) => {
-        log.info(`音视频合成成功：${videoInfo.title} ${res}`)
+        log.info(`Tổng hợp âm thanh và video thành công:${videoInfo.title} ${res}`)
         event.reply('download-video-status', {
           id: videoInfo.id,
           status: 0,
@@ -160,7 +168,7 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
         handleDeleteFile(setting, videoInfo)
       })
       .catch((error: any) => {
-        log.error(`音视频合成失败：${videoInfo.title} ${error.message}`)
+        log.error(`Tổng hợp âm thanh và video không thành công:${videoInfo.title} ${error.message}`)
         event.reply('download-video-status', {
           id: videoInfo.id,
           status: 5,

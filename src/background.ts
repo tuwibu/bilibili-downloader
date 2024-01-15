@@ -84,28 +84,11 @@ ipcMain.handle('getvideos', async (event, channelUrl) => {
   const videos: {
     videoUrl: string
   }[] = []
-  let numPage = 1
-  let active = true
-  while (active) {
-    event.sender.send('get-video-status', `Đang get trang ${numPage}`)
-    const lists = await page.$$('.cube-list > li > a.cover')
-    if (lists.length > 0) {
-      await page.goto(`${channelUrl}?pn=${numPage}`, {
-        waitUntil: 'networkidle0',
-        timeout: 0
-      })
-      await page.waitForSelector('.cube-list', {
-        timeout: 0
-      })
-      const lists = await page.$$('.cube-list > li > a.cover')
-      for (const item of lists) {
-        const url = await item.evaluate(node => node.getAttribute('href'))
-        if (url) videos.push({ videoUrl: 'https:' + url })
-      }
-      numPage += 1
-    } else {
-      active = false
-      break
+  const lists = await page.$$('.cube-list > li > a.cover')
+  if (lists.length) {
+    for (const item of lists) {
+      const url = await item.evaluate(node => node.getAttribute('href'))
+      if (url) videos.push({ videoUrl: 'https:' + url })
     }
   }
   await browser.close()

@@ -146,19 +146,19 @@ export default async (videoInfo: TaskData, event: IpcMainEvent, setting: Setting
   )
   await sleep(500)
   // 合成视频
-  if (setting.isMerge) {
+  if (setting?.isMerge) {
     event.reply('download-video-status', {
       id: videoInfo.id,
       status: 3,
       progress: 98
     })
     mergeVideoAudio(
-      videoInfo.filePathList[2],
-      videoInfo.filePathList[3],
-      videoInfo.filePathList[0]
+      videoInfo?.filePathList[2],
+      videoInfo?.filePathList[3],
+      videoInfo?.filePathList[0]
     )
       .then((res: any) => {
-        log.info(`Tổng hợp âm thanh và video thành công:${videoInfo.title} ${res}`)
+        log.info(`Tổng hợp âm thanh và video thành công:${videoInfo?.title} ${res}`)
         event.reply('download-video-status', {
           id: videoInfo.id,
           status: 0,

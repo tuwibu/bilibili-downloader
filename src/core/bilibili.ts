@@ -205,17 +205,18 @@ const checkUrl = (url: string, type: string, data?: {
         if (element.videoUrl.includes(key)) {
           newData.push({
             url: element.videoUrl,
-            type: mapUrl[key]
+            type: element.videoUrl.includes(key) ? mapUrl[key] : null
           })
         }
       }
     }
-    return newData
+    // filter type === null
+    return newData.filter(item => item.type !== null)
   }
 }
 
 // 检查url是否有重定向
-const checkUrlRedirect = async (videoUrl: string, type: string, data: {
+const checkUrlRedirect = async (videoUrl: string, type: string, data?: {
   url: string,
   type: string
 }[]) => {
@@ -487,23 +488,25 @@ const handleFilePathList = (page: number, title: string, up: string, bvid: strin
   const downloadPath = store.settingStore().downloadPath
   // const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
   const isFolder = store.settingStore().isFolder
+  const name = `${id}-${Date.now()}`
   return [
-    `${downloadPath}/${isFolder ? `${id}/` : ''}video.mp4`,
-    `${downloadPath}/${isFolder ? `${id}/` : ''}image.png`,
-    `${downloadPath}/${isFolder ? `${id}/` : ''}m4s-video.m4s`,
-    `${downloadPath}/${isFolder ? `${id}/` : ''}audio.m4s`,
+    `${downloadPath}/${isFolder ? `${name}/` : ''}video.mp4`,
+    `${downloadPath}/${isFolder ? `${name}/` : ''}image.png`,
+    `${downloadPath}/${isFolder ? `${name}/` : ''}m4s-video.m4s`,
+    `${downloadPath}/${isFolder ? `${name}/` : ''}audio.m4s`,
     // txt
-    `${downloadPath}/${isFolder ? `${id}/` : ''}name.txt`,
-    isFolder ? `${downloadPath}/${id}/` : ''
+    `${downloadPath}/${isFolder ? `${name}/` : ''}name.txt`,
+    isFolder ? `${downloadPath}/${name}/` : ''
   ]
 }
 
 // 处理fileDir
 const handleFileDir = (page: number, title: string, up: string, bvid: string, id: string): string => {
   const downloadPath = store.settingStore().downloadPath
-  const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
+  // const name = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}-${id}`)}`
+  const name = `${id}-${Date.now()}`
   const isFolder = store.settingStore().isFolder
-  return `${downloadPath}${isFolder ? `/${id}/` : ''}`
+  return `${downloadPath}${isFolder ? `/${name}/` : ''}`
 }
 
 // 处理bv多p逻辑

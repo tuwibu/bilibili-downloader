@@ -140,6 +140,6 @@ export const downloadDanmaku = async (cid: number, title: string, path: string) 
     const str = await convertToAssFromJson(danmaku, title)
     window.electron.saveDanmukuFile(str, path)
   } catch (error: any) {
-    message.error(`Lỗi tải Danmaku：${error.message}`)
+    // message.error(`Lỗi tải Danmaku：${error.message}`)
   }
 }

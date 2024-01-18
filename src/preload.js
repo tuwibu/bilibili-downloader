@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('electron', {
   openDirDialog () {
     return ipcRenderer.invoke('open-dir-dialog')
   },
+  openDirDialogFile () {
+    return ipcRenderer.invoke('open-dir-dialog-file')
+  },
   got (url, option) {
     return ipcRenderer.invoke('got', url, option)
   },

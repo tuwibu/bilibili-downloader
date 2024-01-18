@@ -50,6 +50,17 @@
           </template>
         </a-input>
         <a-input
+          v-if="item.type === 'file'"
+          :placeholder="item.placeholder"
+          readonly
+          class="custom-input"
+          v-model:value="modelRef[item.name]"
+          @click="openDirDialogFile">
+          <template #suffix>
+            <FolderOutlined style="color: rgba(0,0,0,.45)" />
+          </template>
+        </a-input>
+        <a-input
           v-if="item.type === 'input'"
           :placeholder="item.placeholder"
           v-model:value="modelRef[item.name]"
@@ -72,7 +83,7 @@ import { storeToRefs } from 'pinia'
 import LoginModal from '../LoginModal/index.vue'
 
 const { loginStatus } = storeToRefs(store.baseStore())
-const { downloadPath, isDanmaku, isDelete, isFolder, isMerge, isSubtitle, downloadingMaxSize } = storeToRefs(store.settingStore())
+const { downloadPath, isDanmaku, isDelete, isFolder, isMerge, isSubtitle, downloadingMaxSize, cookie } = storeToRefs(store.settingStore())
 
 const loginModal = ref<any>(null)
 const visible = ref<boolean>(false)
@@ -89,7 +100,12 @@ const open = () => {
   modelRef.isDanmaku = isDanmaku.value
   modelRef.isFolder = isFolder.value
   modelRef.downloadingMaxSize = downloadingMaxSize.value
+  modelRef.cookie = cookie.value
   toogleVisible()
+}
+
+const getModelRef = () => {
+  return modelRef.cookie
 }
 
 const toogleVisible = () => {
@@ -100,10 +116,20 @@ const hide = () => {
   validate()
     .then(() => {
       store.settingStore().setSetting(toRaw(modelRef))
+      store.settingStore().setCookie(modelRef.cookie)
       toogleVisible()
     })
     .catch(err => {
       console.log('error', err)
+    })
+}
+
+const openDirDialogFile = () => {
+  window.electron.openDirDialogFile()
+    .then((res: string) => {
+      console.log(res)
+      modelRef.cookie = res
+      store.settingStore().setDownloadPath(res)
     })
 }
 
@@ -122,7 +148,8 @@ const quitLogin = () => {
 }
 
 defineExpose({
-  open
+  open,
+  getModelRef
 })
 </script>
 

@@ -52,6 +52,7 @@ const showContextmenu = () => {
 
 const download = async () => {
   console.log('download')
+  const cookie = settingDrawer.value.getModelRef()
   loading.value = true
   if (!videoUrl.value) {
     message.warn('Vui lòng nhập địa chỉ video')
@@ -62,10 +63,19 @@ const download = async () => {
   let infoChannel = null
   if (videoUrl.value.includes('space.bilibili.com') && videoUrl.value.includes('video')) {
     // eslint-disable-next-line no-const-assign
-    const { info, videos } = await window.electron.getvideos(videoUrl.value)
-    type.value = 'channel'
-    data = videos
-    infoChannel = info
+    try {
+      const { info, videos } = await window.electron.getvideos({
+        url: videoUrl.value,
+        cookie
+      })
+      type.value = 'channel'
+      data = videos
+      infoChannel = info
+    } catch (error: any) {
+      message.error(error.message)
+      loading.value = false
+      return
+    }
   } else {
     type.value = 'video'
   }

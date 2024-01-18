@@ -14,10 +14,10 @@ const formConfig = [
   },
   {
     label: 'Cookie',
-    placeholder: 'Nhập cookie',
-    type: 'input',
+    placeholder: 'Đường dẫn file cookie',
+    type: 'file',
     name: 'cookie',
-    tips: 'Cookie sẽ được lưu lại để sử dụng cho lần sau.'
+    tips: 'Mặc định sẽ là folder download'
   },
   {
     label: 'Số lượng tải xuống tối đa',
@@ -71,7 +71,8 @@ const settingData = {
   isDanmaku: true,
   isFolder: true,
   isCover: true,
-  downloadingMaxSize: 5
+  downloadingMaxSize: 5,
+  cookie: ''
 }
 
 const settingRules = {
@@ -113,6 +114,11 @@ const settingRules = {
     }
   ],
   isCover: [
+    {
+      required: false
+    }
+  ],
+  cookie: [
     {
       required: false
     }

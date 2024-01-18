@@ -14,7 +14,8 @@ export const settingStore = defineStore('setting', {
       isDanmaku: true,
       isFolder: true,
       isCover: true,
-      downloadingMaxSize: 5
+      downloadingMaxSize: 5,
+      cookie: ''
     }
     return setting
   },
@@ -29,7 +30,8 @@ export const settingStore = defineStore('setting', {
       isDanmaku: state.isDanmaku,
       isFolder: state.isFolder,
       isCover: state.isCover,
-      downloadingMaxSize: state.downloadingMaxSize
+      downloadingMaxSize: state.downloadingMaxSize,
+      cookie: state.cookie
     })
   },
   actions: {
@@ -72,6 +74,10 @@ export const settingStore = defineStore('setting', {
     setDownloadingMaxSize (size: number) {
       this.downloadingMaxSize = size
       window.electron.setStore('setting.downloadingMaxSize', size)
+    },
+    setCookie (cookie: string) {
+      this.cookie = cookie
+      window.electron.setStore('setting.cookie', cookie)
     },
     setSetting (setting: SettingDataEasy) {
       const allSetting = this.getSetting

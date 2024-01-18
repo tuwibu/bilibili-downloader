@@ -56,16 +56,42 @@ ipcMain.on('open-path', (event, path) => {
   shell.openPath(path)
 })
 
-ipcMain.handle('getvideos', async (event, channelUrl) => {
+ipcMain.handle('getvideos', async (event, {
+  url,
+  cookie
+}) => {
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null
   })
   const page = await browser.newPage()
-  await page.goto(channelUrl, {
+  if (cookie) {
+    try {
+      const rawData = await fs.readFileSync(cookie, 'utf8')
+      const cookieData = await JSON.parse(rawData)
+      await page.setCookie(...cookieData)
+    } catch (error: any) {
+      await browser.close()
+      throw new Error(`readFileSync error: ${error.message}`)
+    }
+  }
+  await page.goto(url, {
     waitUntil: 'networkidle0',
     timeout: 0
   })
+  await page.reload({
+    waitUntil: 'networkidle0',
+    timeout: 0
+  })
+  await page.waitForTimeout(1000)
+  const avatar = await page.evaluate(() => {
+    const avatar = document.querySelector('.header-entry-avatar .bili-avatar')
+    return avatar !== null
+  })
+  if (!avatar) {
+    await browser.close()
+    throw new Error('Chưa đăng nhập, vui lòng file nhập cookie trong setting')
+  }
   await page.waitForSelector('.cube-list', {
     timeout: 0
   })
@@ -84,6 +110,9 @@ ipcMain.handle('getvideos', async (event, channelUrl) => {
   const videos: {
     videoUrl: string
   }[] = []
+  await page.waitForSelector('.cube-list > li > a.cover', {
+    timeout: 0
+  })
   const lists = await page.$$('.cube-list > li > a.cover')
   if (lists.length) {
     for (const item of lists) {
@@ -97,7 +126,7 @@ ipcMain.handle('getvideos', async (event, channelUrl) => {
       avatar: 'https:' + avatarUrl,
       name,
       count,
-      url: channelUrl
+      url: url
     },
     videos
   }
@@ -112,6 +141,30 @@ ipcMain.handle('open-dir-dialog', () => {
   })
   if (filePaths) {
     return Promise.resolve(filePaths[0])
+  } else {
+    return Promise.resolve('')
+  }
+})
+
+ipcMain.handle('open-dir-dialog-file', () => {
+  const filePaths = dialog.showOpenDialogSync({
+    title: 'Chọn file json',
+    defaultPath: app.getPath('downloads'),
+    properties: ['openFile'],
+    filters: [
+      { name: 'JSON Files', extensions: ['json'] }
+    ]
+  })
+  if (filePaths && filePaths.length > 0) {
+    const selectedFilePath = filePaths[0]
+    const extname = path.extname(selectedFilePath)
+
+    if (extname.toLowerCase() === '.json') {
+      return Promise.resolve(selectedFilePath)
+    } else {
+      dialog.showErrorBox('Lỗi', 'Chỉ chấp nhận tệp JSON.')
+      return Promise.resolve('')
+    }
   } else {
     return Promise.resolve('')
   }

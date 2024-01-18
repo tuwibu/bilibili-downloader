@@ -58,7 +58,7 @@ ipcMain.on('open-path', (event, path) => {
 
 ipcMain.handle('getvideos', async (event, channelUrl) => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: null
   })
   const page = await browser.newPage()

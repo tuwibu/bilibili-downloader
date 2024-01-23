@@ -266,11 +266,11 @@ const parseHtml = async (html: string, videoType: string, url: string, type: str
   if (type === 'video') {
     switch (videoType) {
       case 'BV':
-        return parseBV(html, url)
+        return parseBV(html, url, type)
       case 'ss':
-        return parseSS(html)
+        return parseSS(html, type)
       case 'ep':
-        return parseEP(html, url)
+        return parseEP(html, url, type)
       default:
         return -1
     }
@@ -280,13 +280,19 @@ const parseHtml = async (html: string, videoType: string, url: string, type: str
       const element = data[index]
       switch (element.type) {
         case 'BV':
-          infos.push(await parseBV(element.body, element.url))
+          // eslint-disable-next-line no-case-declarations
+          const info = await parseBV(element.body, element.url, type)
+          info && infos.push(info)
           break
         case 'ss':
-          infos.push(await parseSS(element.body))
+          // eslint-disable-next-line no-case-declarations
+          const ssInfo = await parseSS(element.body, type)
+          ssInfo && infos.push(ssInfo)
           break
         case 'ep':
-          infos.push(await parseEP(element.body, element.url))
+          // eslint-disable-next-line no-case-declarations
+          const epInfo = await parseEP(element.body, element.url, type)
+          epInfo && infos.push(epInfo)
           break
         default:
           break
@@ -296,12 +302,20 @@ const parseHtml = async (html: string, videoType: string, url: string, type: str
   }
 }
 
-const parseBV = async (html: string, url: string) => {
+const convertToSeconds = (time: string) => {
+  // 00:03:59
+  const timeArray = time.split(':')
+  const hour = +timeArray[0]
+  const minute = +timeArray[1]
+  const second = +timeArray[2]
+  return hour * 3600 + minute * 60 + second
+}
+
+const parseBV = async (html: string, url: string, type: string) => {
   try {
     const videoInfo = html.match(/\<\/script\>\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)/)
     if (!videoInfo) throw new Error('parse bv error')
     const { videoData } = JSON.parse(videoInfo[1])
-    // 获取视频下载地址
     let acceptQuality = null
     try {
       let downLoadData: any = html.match(/\<script\>window\.\_\_playinfo\_\_\=([\s\S]*?)\<\/script\>\<script\>window\.\_\_INITIAL\_STATE\_\_\=/)
@@ -339,15 +353,19 @@ const parseBV = async (html: string, url: string) => {
       size: -1,
       downloadUrl: { video: '', audio: '' }
     }
-    console.log('bv')
-    console.log(obj)
-    return obj
+    if (type === 'channel' && convertToSeconds(obj.duration) < 2700) {
+      return null
+    } else {
+      console.log('bv')
+      console.log(obj)
+      return obj
+    }
   } catch (error: any) {
     throw new Error(error)
   }
 }
 
-const parseEP = async (html: string, url: string) => {
+const parseEP = async (html: string, url: string, type: string) => {
   try {
     const videoInfo = html.match(/\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)\{var s\;/)
     if (!videoInfo) throw new Error('parse ep error')
@@ -390,15 +408,19 @@ const parseEP = async (html: string, url: string) => {
       size: -1,
       downloadUrl: { video: '', audio: '' }
     }
-    console.log('ep')
-    console.log(obj)
-    return obj
+    if (type === 'channel' && convertToSeconds(obj.duration) < 2700) {
+      return null
+    } else {
+      console.log('ep')
+      console.log(obj)
+      return obj
+    }
   } catch (error: any) {
     throw new Error(error)
   }
 }
 
-const parseSS = async (html: string) => {
+const parseSS = async (html: string, type: string) => {
   try {
     const videoInfo = html.match(/\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)\{var s\;/)
     if (!videoInfo) throw new Error('parse ss error')
@@ -413,7 +435,7 @@ const parseSS = async (html: string) => {
       }
     }
     const { body } = await window.electron.got(params.url, params.config)
-    return parseEP(body, params.url)
+    return parseEP(body, params.url, type)
   } catch (error: any) {
     throw new Error(error)
   }

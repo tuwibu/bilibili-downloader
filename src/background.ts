@@ -61,7 +61,7 @@ ipcMain.handle('getvideos', async (event, {
   cookie
 }) => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null
   })
   const page = await browser.newPage()

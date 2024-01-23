@@ -104,9 +104,10 @@ const download = async () => {
   data = Array.isArray(data) ? info : data
   // parse html
   try {
-    const videoInfo = await parseHtml(info?.body, videoType, info?.url, type.value, data)
+    const videoInfo:any = await parseHtml(info?.body, videoType, info?.url, type.value, data)
+    console.log('videoInfo', videoInfo)
     loading.value = false
-    if (Array.isArray(videoInfo)) {
+    if (Array.isArray(videoInfo) && videoInfo.length > 0 && type.value === 'channel') {
       channelModal.value.open(videoInfo, infoChannel)
     } else {
       videoModal.value.open(videoInfo)
@@ -118,6 +119,7 @@ const download = async () => {
     // } else {
     //   message.error(`Lỗi phân tích cú pháp：${error}`)
     // }
+    message.error('Không tìm thấy video tương ứng')
   }
 }
 </script>

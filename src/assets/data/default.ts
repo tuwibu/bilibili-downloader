@@ -39,7 +39,8 @@ export const settingData: SettingData = {
   isFolder: true,
   isCover: true,
   downloadingMaxSize: 5,
-  cookie: ''
+  cookie: '',
+  time: 0
 }
 
 export const taskData: TaskData = {

@@ -20,6 +20,13 @@ const formConfig = [
     tips: 'Mặc định sẽ là folder download'
   },
   {
+    label: 'Thời lượng cố định của video',
+    placeholder: 'Thời lượng của video tính theo giây(s)',
+    type: 'input',
+    name: 'time',
+    tips: 'Mặc định là 0, nếu nhập số lớn hơn 0 thì sẽ tải video theo thời lượng cố định'
+  },
+  {
     label: 'Số lượng tải xuống tối đa',
     type: 'slider',
     name: 'downloadingMaxSize',
@@ -72,7 +79,8 @@ const settingData = {
   isFolder: true,
   isCover: true,
   downloadingMaxSize: 5,
-  cookie: ''
+  cookie: '',
+  time: 0
 }
 
 const settingRules = {
@@ -119,6 +127,11 @@ const settingRules = {
     }
   ],
   cookie: [
+    {
+      required: false
+    }
+  ],
+  time: [
     {
       required: false
     }

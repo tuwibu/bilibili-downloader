@@ -9,7 +9,8 @@ export interface SettingData {
   isFolder: boolean,
   isCover: boolean,
   downloadingMaxSize: number,
-  cookie: string
+  cookie: string,
+  time: number
 }
 
 export interface SettingDataEasy {

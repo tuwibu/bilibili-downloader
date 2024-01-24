@@ -83,7 +83,7 @@ import { storeToRefs } from 'pinia'
 import LoginModal from '../LoginModal/index.vue'
 
 const { loginStatus } = storeToRefs(store.baseStore())
-const { downloadPath, isDanmaku, isDelete, isFolder, isMerge, isSubtitle, downloadingMaxSize, cookie } = storeToRefs(store.settingStore())
+const { downloadPath, isDanmaku, isDelete, isFolder, isMerge, isSubtitle, downloadingMaxSize, cookie, time } = storeToRefs(store.settingStore())
 
 const loginModal = ref<any>(null)
 const visible = ref<boolean>(false)
@@ -101,11 +101,16 @@ const open = () => {
   modelRef.isFolder = isFolder.value
   modelRef.downloadingMaxSize = downloadingMaxSize.value
   modelRef.cookie = cookie.value
+  modelRef.time = time.value
   toogleVisible()
 }
 
 const getModelRef = () => {
   return modelRef.cookie
+}
+
+const getTime = () => {
+  return modelRef.time
 }
 
 const toogleVisible = () => {
@@ -149,7 +154,8 @@ const quitLogin = () => {
 
 defineExpose({
   open,
-  getModelRef
+  getModelRef,
+  getTime
 })
 </script>
 

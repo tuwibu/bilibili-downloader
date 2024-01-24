@@ -15,7 +15,8 @@ export const settingStore = defineStore('setting', {
       isFolder: true,
       isCover: true,
       downloadingMaxSize: 5,
-      cookie: ''
+      cookie: '',
+      time: 0
     }
     return setting
   },
@@ -31,7 +32,8 @@ export const settingStore = defineStore('setting', {
       isFolder: state.isFolder,
       isCover: state.isCover,
       downloadingMaxSize: state.downloadingMaxSize,
-      cookie: state.cookie
+      cookie: state.cookie,
+      time: state.time
     })
   },
   actions: {
@@ -78,6 +80,10 @@ export const settingStore = defineStore('setting', {
     setCookie (cookie: string) {
       this.cookie = cookie
       window.electron.setStore('setting.cookie', cookie)
+    },
+    setTime (time: number) {
+      this.time = time
+      window.electron.setStore('setting.time', time)
     },
     setSetting (setting: SettingDataEasy) {
       const allSetting = this.getSetting

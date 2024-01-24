@@ -262,7 +262,7 @@ const checkUrlRedirect = async (videoUrl: string, type: string, data?: {
   }
 }
 
-const parseHtml = async (html: string, videoType: string, url: string, type: string, data?: any) => {
+const parseHtml = async (html: string, videoType: string, url: string, type: string, data?: any, time?: number) => {
   if (type === 'video') {
     switch (videoType) {
       case 'BV':
@@ -281,17 +281,17 @@ const parseHtml = async (html: string, videoType: string, url: string, type: str
       switch (element.type) {
         case 'BV':
           // eslint-disable-next-line no-case-declarations
-          const info = await parseBV(element.body, element.url, type)
+          const info = await parseBV(element.body, element.url, type, time)
           info && infos.push(info)
           break
         case 'ss':
           // eslint-disable-next-line no-case-declarations
-          const ssInfo = await parseSS(element.body, type)
+          const ssInfo = await parseSS(element.body, type, time)
           ssInfo && infos.push(ssInfo)
           break
         case 'ep':
           // eslint-disable-next-line no-case-declarations
-          const epInfo = await parseEP(element.body, element.url, type)
+          const epInfo = await parseEP(element.body, element.url, type, time)
           epInfo && infos.push(epInfo)
           break
         default:
@@ -311,7 +311,8 @@ const convertToSeconds = (time: string) => {
   return hour * 3600 + minute * 60 + second
 }
 
-const parseBV = async (html: string, url: string, type: string) => {
+const parseBV = async (html: string, url: string, type: string, time?:number) => {
+  const newTime = time || 0
   try {
     const videoInfo = html.match(/\<\/script\>\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)/)
     if (!videoInfo) throw new Error('parse bv error')
@@ -353,7 +354,7 @@ const parseBV = async (html: string, url: string, type: string) => {
       size: -1,
       downloadUrl: { video: '', audio: '' }
     }
-    if (type === 'channel' && convertToSeconds(obj.duration) < 2700) {
+    if ((type === 'channel' && convertToSeconds(obj.duration) < newTime) && newTime !== 0) {
       return null
     } else {
       console.log('bv')
@@ -365,7 +366,8 @@ const parseBV = async (html: string, url: string, type: string) => {
   }
 }
 
-const parseEP = async (html: string, url: string, type: string) => {
+const parseEP = async (html: string, url: string, type: string, time?: number) => {
+  const newTime = time || 0
   try {
     const videoInfo = html.match(/\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)\{var s\;/)
     if (!videoInfo) throw new Error('parse ep error')
@@ -408,7 +410,7 @@ const parseEP = async (html: string, url: string, type: string) => {
       size: -1,
       downloadUrl: { video: '', audio: '' }
     }
-    if (type === 'channel' && convertToSeconds(obj.duration) < 2700) {
+    if ((type === 'channel' && convertToSeconds(obj.duration) < newTime) && newTime !== 0) {
       return null
     } else {
       console.log('ep')
@@ -420,7 +422,7 @@ const parseEP = async (html: string, url: string, type: string) => {
   }
 }
 
-const parseSS = async (html: string, type: string) => {
+const parseSS = async (html: string, type: string, time?:number) => {
   try {
     const videoInfo = html.match(/\<script\>window\.\_\_INITIAL\_STATE\_\_\=([\s\S]*?)\;\(function\(\)\{var s\;/)
     if (!videoInfo) throw new Error('parse ss error')

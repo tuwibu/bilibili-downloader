@@ -53,6 +53,7 @@ const showContextmenu = () => {
 const download = async () => {
   console.log('download')
   const cookie = settingDrawer.value.getModelRef()
+  const time = settingDrawer.value.getTime()
   loading.value = true
   if (!videoUrl.value) {
     message.warn('Vui lòng nhập địa chỉ video')
@@ -104,7 +105,8 @@ const download = async () => {
   data = Array.isArray(data) ? info : data
   // parse html
   try {
-    const videoInfo:any = await parseHtml(info?.body, videoType, info?.url, type.value, data)
+    const videoInfo:any = await parseHtml(info?.body, videoType, info?.url, type.value, data, time)
+    console.log('time', time)
     console.log('videoInfo', videoInfo)
     loading.value = false
     if (Array.isArray(videoInfo) && videoInfo.length > 0 && type.value === 'channel') {

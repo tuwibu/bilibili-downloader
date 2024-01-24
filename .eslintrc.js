@@ -26,6 +26,7 @@ module.exports = {
     'quote-props': 'off',
     'space-infix-ops': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-inferrable-types': 'off'
   }
 }
